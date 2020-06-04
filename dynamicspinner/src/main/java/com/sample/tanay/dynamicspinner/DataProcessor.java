@@ -7,6 +7,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.util.JsonReader;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
@@ -107,8 +108,12 @@ class DataProcessor extends HandlerThread {
             Context activity = mApplicationContext.get();
             try {
 
+                Log.d("time", "step 1 starting read " + System.currentTimeMillis());
 
                 DataNode dataNode = getDataInTreeFormat(activity, fileName);
+
+                Log.d("time", "step 2 read complete " + System.currentTimeMillis());
+
                 dataNode.assignId(0, new SparseIntArray());
                 dataNode.assignParentId(false);
 
@@ -116,6 +121,8 @@ class DataProcessor extends HandlerThread {
                 for (int index = 0; index < names.size(); index++) {
                     levelList.put(index, new ArrayList<DataNode>());
                 }
+
+                Log.d("time", "step 3 starting save database " + System.currentTimeMillis());
 
                 saveInfo(dataNode, -1);
 
@@ -126,10 +133,16 @@ class DataProcessor extends HandlerThread {
                     }
                 }
 
+                Log.d("time", "step 4 database saved " + System.currentTimeMillis());
+
                 getDatabaseHelper().buildIndex();
+
+                Log.d("time", "index built " + System.currentTimeMillis());
 
                 mSharedPrefHelper.saveTableList(new TableList(names));
                 mSharedPrefHelper.setDbSaved();
+
+                Log.d("time", "step 6 info saved in shared pref saved");
 
                 if (mSetupListenerWeakReference.get() != null) {
                     getMainHandler().post(new Runnable() {

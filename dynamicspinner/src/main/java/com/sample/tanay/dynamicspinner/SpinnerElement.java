@@ -22,9 +22,15 @@ public final class SpinnerElement {
         return flag;
     }
 
+    static ArrayList<SpinnerElement> getSubset(int startIndex, ArrayList<SpinnerElement> spinnerElements) {
+        ArrayList<SpinnerElement> list = new ArrayList<>();
+        for (++startIndex; startIndex < spinnerElements.size(); startIndex++) {
+            list.add(spinnerElements.get(startIndex));
+        }
+        return list;
+    }
 
     String type;
-    SpinnerElement child;
     Set<String> values;
 
     ViewGroup.LayoutParams layoutParams;
@@ -40,26 +46,18 @@ public final class SpinnerElement {
 
     int separatorWidthDp = 0, separatorHeightDp = 8;
 
-    String placeholderText;
-
-    int columnIndex, idColumnIndex;
-
     public SpinnerElement(String type, ViewGroup.LayoutParams layoutParams) {
-        this(type, null, null, layoutParams);
+        this(type, null, layoutParams);
     }
 
-    public SpinnerElement(String type, SpinnerElement child, Set<String> values, ViewGroup.LayoutParams layoutParams) {
+    public SpinnerElement(String type, Set<String> values, ViewGroup.LayoutParams layoutParams) {
         this.type = type;
-        this.child = child;
         this.values = values;
         this.layoutParams = layoutParams;
     }
 
-    public void setPlaceholderText(String placeholderText) {
-        this.placeholderText = placeholderText;
-    }
 
-    public boolean hasValues() {
+    boolean hasValues() {
         return values != null && values.size() > 0;
     }
 }

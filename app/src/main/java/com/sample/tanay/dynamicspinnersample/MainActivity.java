@@ -3,6 +3,7 @@ package com.sample.tanay.dynamicspinnersample;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<SpinnerElement> spinnerElements;
     private DynamicSpinnerView dynamicSpinnerView;
+
+    private ProgressDialog mProgressDialog;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -61,11 +64,11 @@ public class MainActivity extends AppCompatActivity {
                         ViewGroup.LayoutParams.WRAP_CONTENT)));
 
         Set<String> set = new HashSet<>();
-        set.add("District 1");
-        set.add("District 3");
+//        set.add("District 1");
+//        set.add("District 3");
 
 
-        spinnerElements.add(new SpinnerElement("District", null, set,
+        spinnerElements.add(new SpinnerElement("District", set,
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT)));
 
@@ -84,38 +87,58 @@ public class MainActivity extends AppCompatActivity {
 
 
         Set<String> set2 = new HashSet<>();
-        set2.add("Village 1");
-        set2.add("Village 2");
+//        set2.add("Village 1");
+//        set2.add("Village 2");
 
-        spinnerElements.add(new SpinnerElement("Village", null, set2,
+        spinnerElements.add(new SpinnerElement("Village", set2,
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT)));
 
         Set<String> set3 = new HashSet<>();
-        set3.add("School 1");
-        set3.add("School 2");
+//        set3.add("School 1");
+//        set3.add("School 2");
 
-        spinnerElements.add(new SpinnerElement("School", null, set3,
+        spinnerElements.add(new SpinnerElement("School", set3,
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT)));
 
-        findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
+
+        dynamicSpinnerView.setLazyLoadingEnabled(true);
+        dynamicSpinnerView.setDynamicSpinnerViewListener(new DynamicSpinnerView.DynamicSpinnerViewListener() {
             @Override
-            public void onClick(View v) {
-                generate();
+            public void onLoadStart() {
+                if (mProgressDialog == null) {
+                    mProgressDialog = ProgressDialog.show(MainActivity.this, "Loading", null);
+                }
+                mProgressDialog.show();
+            }
+
+            @Override
+            public void onLoadComplete() {
+                if (mProgressDialog != null) {
+                    mProgressDialog.hide();
+                }
             }
         });
-        DynamicSpinnerView.setup(this, "sample.json", new DynamicSpinnerView.SetupListener() {
-            @Override
-            public void onSetupStart() {
 
-            }
+        DynamicSpinnerView.setup(this, "demo10.json",
+                new DynamicSpinnerView.SetupListener() {
+                    @Override
+                    public void onSetupStart() {
+                        if (mProgressDialog == null) {
+                            mProgressDialog = ProgressDialog.show(MainActivity.this, "Loading", null);
+                        }
+                        mProgressDialog.show();
+                    }
 
-            @Override
-            public void onSetupComplete() {
-                dynamicSpinnerView.load(spinnerElements);
-            }
-        });
+                    @Override
+                    public void onSetupComplete() {
+                        if (mProgressDialog != null) {
+                            mProgressDialog.hide();
+                        }
+                        dynamicSpinnerView.load(spinnerElements);
+                    }
+                });
     }
 
     @Override
@@ -136,45 +159,5 @@ public class MainActivity extends AppCompatActivity {
                 new IntentFilter("org.samagra.SETUP_COMPLETE"));
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
                 new IntentFilter("org.samagra.SETUP_START"));
-    }
-
-    private void generate() {
-        JSONArray jsonArray = new JSONArray();
-
-        for (int i1 = 1; i1 < 11; i1++) {
-            String state = "STATE " + i1;
-            for (int i2 = 1; i2 < 6; i2++) {
-                String district = "District " + i2;
-                for (int i3 = 1; i3 < 4; i3++) {
-                    String zilla = "Zilla " + i3;
-                    for (int i4 = 1; i4 < 6; i4++) {
-                        String tehsil = "Tehsil " + i4;
-                        for (int i5 = 1; i5 < 6; i5++) {
-                            String block = "Block " + i5;
-                            for (int i6 = 1; i6 < 6; i6++) {
-                                String village = "Village " + i6;
-                                for (int i7 = 1; i7 <= 7; i7++) {
-                                    String school = "School " + i7;
-                                    JSONObject jsonObject = new JSONObject();
-                                    try {
-                                        jsonObject.put("State", state);
-                                        jsonObject.put("District", district);
-                                        jsonObject.put("Zilla", zilla);
-                                        jsonObject.put("Tehsil", tehsil);
-                                        jsonObject.put("Block", block);
-                                        jsonObject.put("Village", village);
-                                        jsonObject.put("School", school);
-                                    } catch (JSONException ex) {
-                                        ex.printStackTrace();
-                                    }
-                                    jsonArray.put(jsonObject);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        Log.d("json is ", jsonArray.toString());
     }
 }

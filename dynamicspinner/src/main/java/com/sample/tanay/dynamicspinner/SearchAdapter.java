@@ -64,6 +64,10 @@ class SearchAdapter extends ArrayAdapter<DataNode> {
         this.textResId = textResId;
     }
 
+    public ArrayList<DataNode> getDataset() {
+        return mItems;
+    }
+
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
@@ -85,7 +89,7 @@ class SearchAdapter extends ArrayAdapter<DataNode> {
         return mFilter;
     }
 
-    public int distance(String a, String b) {
+    private int distance(String a, String b) {
         a = a.toLowerCase();
         b = b.toLowerCase();
         int[] costs = new int[b.length() + 1];

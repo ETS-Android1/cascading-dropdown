@@ -14,8 +14,10 @@ final class DataNode {
         if (isPenultimateLevel) {
             leafNodes.addAll(dataNode.children);
         } else {
-            for (DataNode child : dataNode.children) {
-                populateLeafNodes(leafNodes, child, maxLevel, currentLevel + 1);
+            if (dataNode.children != null) {
+                for (DataNode child : dataNode.children) {
+                    populateLeafNodes(leafNodes, child, maxLevel, currentLevel + 1);
+                }
             }
         }
     }

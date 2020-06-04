@@ -9,7 +9,6 @@ import android.util.SparseArray;
 
 import androidx.annotation.NonNull;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -19,7 +18,7 @@ class SpinnerThread extends HandlerThread {
 
     private static SpinnerThread instance;
 
-    public synchronized static SpinnerThread getInstance(Context context) {
+    synchronized static SpinnerThread getInstance(Context context) {
         if (instance == null) {
             instance = new SpinnerThread(context.getApplicationContext());
             instance.start();
@@ -56,17 +55,28 @@ class SpinnerThread extends HandlerThread {
         return mMainHandler;
     }
 
-    void load(ArrayList<SpinnerElement> spinnerElements, Listener listener) {
+    void load(ArrayList<SpinnerElement> spinnerElements, Listener listener, boolean lazyLoading) {
+        load(spinnerElements, listener, lazyLoading, null);
+    }
+
+    void load(ArrayList<SpinnerElement> spinnerElements, Listener listener, DataNode rootNode) {
+        load(spinnerElements, listener, false, rootNode);
+    }
+
+    private void load(ArrayList<SpinnerElement> spinnerElements, Listener listener,
+                      boolean lazyLoading, DataNode rootNode) {
         int id = mAtomicInteger.incrementAndGet();
         Message message = new Message();
-        message.arg1 = id;
-        message.obj = spinnerElements;
+        message.obj = new Request(spinnerElements, id, lazyLoading, rootNode);
         mListenerArray.put(id, listener);
         getInternalHandler().sendMessage(message);
 
     }
 
-    private void process(ArrayList<SpinnerElement> spinnerElements, final int tag) {
+
+    private void process(ArrayList<SpinnerElement> spinnerElements, final int tag, boolean lazyLoading,
+                         DataNode rootNode) {
+
         getMainHandler().post(new Runnable() {
             @Override
             public void run() {
@@ -75,7 +85,8 @@ class SpinnerThread extends HandlerThread {
                     listener.onLoadStart();
             }
         });
-        mDatabaseHelper.loadData(spinnerElements, new DatabaseHelper.DatabaseListener() {
+
+        final DatabaseHelper.DatabaseListener listener = new DatabaseHelper.DatabaseListener() {
             @Override
             public void onLoadComplete(final DataNode rootNode) {
                 getMainHandler().post(new Runnable() {
@@ -84,6 +95,7 @@ class SpinnerThread extends HandlerThread {
                         Listener listener = mListenerArray.get(tag);
                         if (listener != null)
                             listener.onLoadSuccess(rootNode);
+                        mListenerArray.remove(tag);
                     }
                 });
             }
@@ -96,10 +108,16 @@ class SpinnerThread extends HandlerThread {
                         Listener listener = mListenerArray.get(tag);
                         if (listener != null)
                             listener.onLoadFailed(ex);
+                        mListenerArray.remove(tag);
                     }
                 });
             }
-        });
+        };
+
+        if (rootNode == null)
+            mDatabaseHelper.loadData(spinnerElements, listener, lazyLoading);
+        else
+            mDatabaseHelper.loadData(spinnerElements, listener, rootNode);
     }
 
     class SpinnerHandler extends Handler {
@@ -111,7 +129,9 @@ class SpinnerThread extends HandlerThread {
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
-            process((ArrayList<SpinnerElement>) msg.obj, msg.arg1);
+            Request request = (Request) msg.obj;
+            process(request.spinnerElements, request.requestId, request.lazyLoading,
+                    request.selectedDataNode);
         }
     }
 
@@ -123,4 +143,21 @@ class SpinnerThread extends HandlerThread {
         void onLoadSuccess(DataNode rootNode);
     }
 
+    private static class Request {
+        private ArrayList<SpinnerElement> spinnerElements;
+        private int requestId;
+        private boolean lazyLoading;
+        private DataNode selectedDataNode;
+
+        Request(ArrayList<SpinnerElement> spinnerElements, int requestId, boolean lazyLoading) {
+            this(spinnerElements, requestId, lazyLoading, null);
+        }
+
+        Request(ArrayList<SpinnerElement> spinnerElements, int requestId, boolean lazyLoading, DataNode selectedDataNode) {
+            this.spinnerElements = spinnerElements;
+            this.requestId = requestId;
+            this.lazyLoading = lazyLoading;
+            this.selectedDataNode = selectedDataNode;
+        }
+    }
 }

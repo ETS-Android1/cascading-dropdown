@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 
-public class DatabaseHelper extends SQLiteOpenHelper {
+class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "DynamicSpinnerDb";
     private static final int MAX_LIMIT = 150000;
@@ -65,11 +65,56 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 tableName + "(" + columnName + ")";
     }
 
-    void loadData(ArrayList<SpinnerElement> spinnerElements, DatabaseListener listener) {
-        String sql = buildSelectSQL(spinnerElements) + " " + buildTableInfo(spinnerElements)
-                + " " + buildWhereClauseIfRequired(spinnerElements);
+    void loadData(ArrayList<SpinnerElement> spinnerElements, DatabaseListener listener, boolean lazyLoading) {
+        if (lazyLoading) {
+            loadTableData(spinnerElements.get(0), listener);
+        } else {
+            loadDataAtOnce(spinnerElements, listener);
+        }
+    }
 
-        DataNode rootNode = new DataNode("root");
+    void loadData(ArrayList<SpinnerElement> spinnerElements, DatabaseListener listener, DataNode dataNode) {
+        String sql = buildSelectClause(spinnerElements) + buildJoinClause(spinnerElements)
+                + buildWhereClauseIfRequired(spinnerElements)
+                + (SpinnerElement.hasValues(spinnerElements) ? " AND " : " WHERE ")
+                + spinnerElements.get(0).type + "." + PARENT_ID + " = " + dataNode.id + ";";
+        executeSQLAndLoadData(sql, spinnerElements, listener, dataNode);
+    }
+
+    private void loadTableData(SpinnerElement spinnerElement, DatabaseListener listener) {
+        try {
+            String sql = "SELECT * FROM " + spinnerElement.type;
+
+            if (spinnerElement.hasValues()) {
+                sql = sql + " WHERE";
+                int index = 0;
+                for (String value : spinnerElement.values) {
+                    sql = " " + NAME + " LIKE " + '"' + value + '"' +
+                            (index < spinnerElement.values.size() - 1 ? " OR " : "");
+                    index++;
+                }
+            }
+
+            Cursor cursor = db.rawQuery(sql, null);
+            DataNode rootNode = new DataNode("root");
+            rootNode.children = new ArrayList<>();
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    int id = cursor.getInt(cursor.getColumnIndex(ID));
+                    String name = cursor.getString(cursor.getColumnIndex(NAME));
+                    rootNode.children.add(new DataNode(name, id));
+                } while (cursor.moveToNext());
+            }
+
+            listener.onLoadComplete(rootNode);
+        } catch (Exception ex) {
+            listener.onLoadError(ex);
+        }
+    }
+
+    private void executeSQLAndLoadData(String sql, ArrayList<SpinnerElement> spinnerElements,
+                                       DatabaseListener listener, DataNode rootNode) {
         DataNode copy = rootNode;
 
         int offset = 0;
@@ -80,35 +125,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String finalSQL = sql + "LIMIT " + MAX_LIMIT + " OFFSET " + (offset * MAX_LIMIT) + ";";
                 Cursor cursor = db.rawQuery(finalSQL, null);
                 offset++;
-                if (cursor != null) {
-                    int size = 0;
-                    if (cursor.moveToFirst()) {
-                        size = cursor.getCount();
+                int size = 0;
+                if (cursor != null && cursor.moveToFirst()) {
+                    size = cursor.getCount();
+                    do {
                         for (SpinnerElement spinnerElement : spinnerElements) {
-                            spinnerElement.idColumnIndex = cursor
-                                    .getColumnIndex(spinnerElement.type + "_" + ID);
-                            spinnerElement.columnIndex = cursor
-                                    .getColumnIndex(spinnerElement.type + "_" + NAME);
-                        }
-                        do {
-                            for (SpinnerElement spinnerElement : spinnerElements) {
-                                int id = cursor.getInt(spinnerElement.idColumnIndex);
-                                String name = cursor.getString(spinnerElement.columnIndex);
-                                DataNode dataNode = rootNode.getChild(id);
-                                if (dataNode == null) {
-                                    dataNode = new DataNode(name, id);
-                                    if (rootNode.children == null) {
-                                        rootNode.children = new ArrayList<>();
-                                    }
-                                    rootNode.children.add(dataNode);
+                            int id = cursor.getInt(cursor
+                                    .getColumnIndex(spinnerElement.type + "_" + ID));
+
+                            String name = cursor.getString(cursor
+                                    .getColumnIndex(spinnerElement.type + "_" + NAME));
+
+                            DataNode dataNode = rootNode.getChild(id);
+
+                            if (dataNode == null) {
+                                dataNode = new DataNode(name, id);
+                                if (rootNode.children == null) {
+                                    rootNode.children = new ArrayList<>();
                                 }
-                                rootNode = dataNode;
+                                rootNode.children.add(dataNode);
                             }
-                            rootNode = copy;
-                        } while (cursor.moveToNext());
-                    }
+                            rootNode = dataNode;
+                        }
+                        rootNode = copy;
+                    } while (cursor.moveToNext());
+
                     cursor.close();
-                    cursor = null;
+
                     if (size < MAX_LIMIT) {
                         break;
                     }
@@ -120,10 +163,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } catch (Exception ex) {
             listener.onLoadError(ex);
         }
-
     }
 
-    private String buildSelectSQL(ArrayList<SpinnerElement> spinnerElements) {
+    private void loadDataAtOnce(ArrayList<SpinnerElement> spinnerElements, DatabaseListener listener) {
+        String sql = buildSelectClause(spinnerElements) + " " + buildJoinClause(spinnerElements)
+                + " " + buildWhereClauseIfRequired(spinnerElements);
+
+        executeSQLAndLoadData(sql, spinnerElements, listener, new DataNode("root"));
+    }
+
+    private String buildSelectClause(ArrayList<SpinnerElement> spinnerElements) {
         StringBuilder stringBuilder = new StringBuilder("SELECT ");
         for (SpinnerElement spinnerElement : spinnerElements) {
             stringBuilder.append(spinnerElement.type).append('.').append(NAME)
@@ -170,7 +219,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return stringBuilder.toString();
     }
 
-    private String buildTableInfo(ArrayList<SpinnerElement> spinnerElements) {
+    private String buildJoinClause(ArrayList<SpinnerElement> spinnerElements) {
         StringBuilder stringBuilder = new StringBuilder(" from ");
         String first = spinnerElements.get(0).type;
         String last = (spinnerElements.size() > 1)

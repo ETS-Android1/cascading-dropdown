@@ -12,4 +12,6 @@
 /captures
 .externalNativeBuild
 .cxx
-app/src/main/assets/demo9.txt
+app/src/main/assets/demo10.json
+app/src/main/assets/demo11.json
+.idea/*

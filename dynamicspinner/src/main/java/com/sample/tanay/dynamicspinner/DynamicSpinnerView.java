@@ -24,38 +24,41 @@ public class DynamicSpinnerView extends LinearLayout {
 
     private DynamicSpinnerViewListener mDynamicSpinnerViewListener;
 
-
-    private SpinnerElement mSpinnerElement;
-
     private ArrayList<SpinnerElement> mSpinnerElements;
     private ArrayList<ViewInfo> viewInfoArrayList = new ArrayList<>();
+    private boolean lazyLoadingEnabled;
+    private SearchAdapter mSearchAdapter;
 
 
     public DynamicSpinnerView(Context context) {
         super(context);
-        setOrientationToVertical();
+        init();
     }
 
     public DynamicSpinnerView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        setOrientationToVertical();
+        init();
     }
 
     public DynamicSpinnerView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        setOrientationToVertical();
+        init();
     }
 
     @TargetApi(21)
     public DynamicSpinnerView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        setOrientationToVertical();
+        init();
     }
 
-    private void setOrientationToVertical() {
+    private void init() {
         setOrientation(VERTICAL);
+        lazyLoadingEnabled = false;
     }
 
+    public void setLazyLoadingEnabled(boolean lazyLoadingEnabled) {
+        this.lazyLoadingEnabled = lazyLoadingEnabled;
+    }
 
     public void setDynamicSpinnerViewListener(DynamicSpinnerViewListener mDynamicSpinnerViewListener) {
         this.mDynamicSpinnerViewListener = mDynamicSpinnerViewListener;
@@ -64,6 +67,7 @@ public class DynamicSpinnerView extends LinearLayout {
 
     public void load(ArrayList<SpinnerElement> spinnerElements) {
         this.mSpinnerElements = spinnerElements;
+        Log.d("time", "step 7 info fetch start");
         SpinnerThread.getInstance(getContext()).load(spinnerElements, new SpinnerThread.Listener() {
             @Override
             public void onLoadStart() {
@@ -77,20 +81,20 @@ public class DynamicSpinnerView extends LinearLayout {
 
             @Override
             public void onLoadSuccess(DataNode rootNode) {
-
+                Log.d("time", "step 8 info fetch complete");
                 setup(rootNode);
+                Log.d("time", "step 9 view setup complete");
             }
-        });
+        }, lazyLoadingEnabled);
     }
 
-
-    private void setup(final DataNode rootNode) {
-        rootNode.setAsParent(0, mSpinnerElements.size());
+    private void setupAutocomplete(DataNode rootNode) {
         final ArrayList<DataNode> leafNodes = new ArrayList<>();
         DataNode.populateLeafNodes(leafNodes, rootNode, mSpinnerElements.size(), 0);
-        SearchAdapter searchAdapter = new SearchAdapter(getContext(), android.R.layout.simple_list_item_2,
+        mSearchAdapter = new SearchAdapter(getContext(), android.R.layout.simple_list_item_2,
                 android.R.id.text1, leafNodes);
-        AutoCompleteTextView autoCompleteTextView = new AutoCompleteTextView(getContext());
+
+        final AutoCompleteTextView autoCompleteTextView = new AutoCompleteTextView(getContext());
         autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -113,56 +117,90 @@ public class DynamicSpinnerView extends LinearLayout {
                         nextViewInfo.adapter.notifyDataSetChanged();
                     }
                 }
+                autoCompleteTextView.setText("");
             }
         });
-        autoCompleteTextView.setAdapter(searchAdapter);
+        autoCompleteTextView.setAdapter(mSearchAdapter);
         autoCompleteTextView.setThreshold(2);
         addView(autoCompleteTextView);
-        int index = 0;
-        for (SpinnerElement element : mSpinnerElements) {
 
-            Spinner spinner = new Spinner(getContext());
-            ArrayList<DataNode> dataset = new ArrayList<>();
-            if (index == 0) {
-                dataset.addAll(rootNode.children);
-            }
-            ArrayAdapter<DataNode> adapter = new ArrayAdapter<>(getContext(), element.resourceId, element.textViewId, dataset);
-            spinner.setAdapter(adapter);
-            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    int pos = (int) parent.getTag();
-                    ViewInfo viewInfo = viewInfoArrayList.get(pos);
-                    DataNode selectedDataNode = viewInfo.dataset.get(position);
-                    if (viewInfo.previouslySelectedDataNode != selectedDataNode) {
-                        viewInfo.previouslySelectedDataNode = selectedDataNode;
-                        if (pos < viewInfoArrayList.size() - 1 && selectedDataNode.children != null) {
-                            ViewInfo nextViewInfo = viewInfoArrayList.get(pos + 1);
-                            nextViewInfo.dataset.clear();
-                            nextViewInfo.dataset.addAll(selectedDataNode.children);
-                            nextViewInfo.spinner.setAdapter(null);
-                            nextViewInfo.spinner.setAdapter(nextViewInfo.adapter);
-                            if (nextViewInfo.itemToBeSelected != null) {
-                                int positionOfNodeToBeSelected = DataNode.getPosition(nextViewInfo.itemToBeSelected, nextViewInfo.dataset);
-                                if (positionOfNodeToBeSelected != -1) {
-                                    nextViewInfo.spinner.setSelection(positionOfNodeToBeSelected);
-                                } else {
-                                    nextViewInfo.spinner.setSelection(0);
-                                }
-                                nextViewInfo.itemToBeSelected = null;
-                            } else {
-                                nextViewInfo.spinner.setSelection(0);
-                            }
+    }
+
+    private void addOnItemSelectedListener(Spinner spinner) {
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                final int pos = (int) parent.getTag();
+                ViewInfo viewInfo = viewInfoArrayList.get(pos);
+                DataNode selectedDataNode = viewInfo.dataset.get(position);
+                if (viewInfo.previouslySelectedDataNode != selectedDataNode) {
+                    viewInfo.previouslySelectedDataNode = selectedDataNode;
+                    if (pos < viewInfoArrayList.size() - 1) {
+                        if (selectedDataNode.children != null && selectedDataNode.children.size() > 0) {
+                            loadChildSpinners(selectedDataNode.children, pos);
+                        } else {
+                            SpinnerThread.getInstance(getContext()).
+                                    load(SpinnerElement.getSubset(pos, mSpinnerElements),
+                                            new SpinnerThread.Listener() {
+                                                @Override
+                                                public void onLoadStart() {
+                                                    Log.d("time", "step 10 lazy load start");
+                                                    if (mDynamicSpinnerViewListener != null) {
+                                                        mDynamicSpinnerViewListener.onLoadStart();
+                                                    }
+                                                }
+
+                                                @Override
+                                                public void onLoadFailed(Exception exception) {
+
+                                                }
+
+                                                @Override
+                                                public void onLoadSuccess(DataNode rootNode) {
+                                                    rootNode.setAsParent(pos + 1,
+                                                            mSpinnerElements.size());
+                                                    if (mSearchAdapter != null) {
+                                                        DataNode.populateLeafNodes(mSearchAdapter.getDataset(),
+                                                                rootNode, mSpinnerElements.size(), pos + 1);
+                                                        mSearchAdapter.notifyDataSetChanged();
+                                                    }
+                                                    loadChildSpinners(rootNode.children, pos);
+                                                    if (mDynamicSpinnerViewListener != null) {
+                                                        mDynamicSpinnerViewListener.onLoadComplete();
+                                                    }
+                                                    Log.d("time", "step 11 lazy load complete");
+                                                }
+                                            }, selectedDataNode);
                         }
                     }
                 }
+            }
 
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-                    int pos = (int) parent.getTag();
-                    Log.d("TAG", "nothing select " + pos);
-                }
-            });
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
+    private void setup(final DataNode rootNode) {
+        rootNode.setAsParent(0, mSpinnerElements.size());
+
+        setupAutocomplete(rootNode);
+
+        int index = 0;
+
+        for (SpinnerElement element : mSpinnerElements) {
+
+            final Spinner spinner = new Spinner(getContext());
+            final ArrayList<DataNode> dataset = new ArrayList<>();
+            if (index == 0) {
+                dataset.addAll(rootNode.children);
+            }
+            ArrayAdapter<DataNode> adapter = new ArrayAdapter<>(getContext(), element.resourceId,
+                    element.textViewId, dataset);
+            spinner.setAdapter(adapter);
+            addOnItemSelectedListener(spinner);
             spinner.setTag(index);
             spinner.setLayoutParams(element.layoutParams);
             View view = new View(getContext());
@@ -174,10 +212,29 @@ public class DynamicSpinnerView extends LinearLayout {
             ViewInfo viewInfo = new ViewInfo(dataset, adapter, spinner, index);
             viewInfoArrayList.add(viewInfo);
             index++;
-            element = element.child;
         }
+
         if (mDynamicSpinnerViewListener != null)
             mDynamicSpinnerViewListener.onLoadComplete();
+    }
+
+    private void loadChildSpinners(ArrayList<DataNode> dataNodes, int pos) {
+        ViewInfo nextViewInfo = viewInfoArrayList.get(pos + 1);
+        nextViewInfo.dataset.clear();
+        nextViewInfo.dataset.addAll(dataNodes);
+        nextViewInfo.spinner.setAdapter(null);
+        nextViewInfo.spinner.setAdapter(nextViewInfo.adapter);
+        if (nextViewInfo.itemToBeSelected != null) {
+            int positionOfNodeToBeSelected = DataNode.getPosition(nextViewInfo.itemToBeSelected, nextViewInfo.dataset);
+            if (positionOfNodeToBeSelected != -1) {
+                nextViewInfo.spinner.setSelection(positionOfNodeToBeSelected);
+            } else {
+                nextViewInfo.spinner.setSelection(0);
+            }
+            nextViewInfo.itemToBeSelected = null;
+        } else {
+            nextViewInfo.spinner.setSelection(0);
+        }
     }
 
     public interface DynamicSpinnerViewListener {
