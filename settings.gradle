@@ -1,0 +1,2 @@
+include ':app', ':dynamicspinner'
+rootProject.name='Dynamic Spinner Sample'
