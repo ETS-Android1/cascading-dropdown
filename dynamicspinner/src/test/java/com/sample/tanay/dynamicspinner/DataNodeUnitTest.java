@@ -3,10 +3,12 @@ package com.sample.tanay.dynamicspinner;
 import android.util.SparseIntArray;
 
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class DataNodeUnitTest {
 
@@ -99,11 +101,14 @@ public class DataNodeUnitTest {
         dataNode.children = new ArrayList<>();
 
         dataNode.children = new ArrayList<>();
-        for (int i = 0; i < CHILDREN.length; i++) {
-            dataNode.children.add(new DataNode(CHILDREN[i], i));
-        }
+        dataNode.children.add(new DataNode(CHILDREN[0], 1));
 
-        dataNode.assignId(0, new SparseIntArray());
+
+        SparseIntArray sparseIntArray = mock(SparseIntArray.class);
+        when(sparseIntArray.get(0)).thenReturn(0);
+        when(sparseIntArray.get(1)).thenReturn(0);
+
+        dataNode.assignId(0, sparseIntArray);
 
         assertEquals((int) dataNode.id, 1);
 

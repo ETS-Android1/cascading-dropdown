@@ -210,7 +210,7 @@ public class DynamicSpinnerView extends LinearLayout {
                             PixelUtils.dpToPx(getContext(), element.separatorHeightDp)));
             addView(spinner);
             addView(view);
-            ViewInfo viewInfo = new ViewInfo(dataset, adapter, spinner, index);
+            ViewInfo viewInfo = new ViewInfo(dataset, adapter, spinner);
             viewInfoArrayList.add(viewInfo);
             index++;
         }

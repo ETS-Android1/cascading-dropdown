@@ -10,8 +10,8 @@ import java.util.ArrayList;
 class SharedPrefHelper {
 
     private static SharedPrefHelper instance;
-    private static final String DB_SAVED = "dbSaved";
-    private static final String TABLE_LIST = "tableList";
+    public static final String DB_SAVED = "dbSaved";
+    public static final String TABLE_LIST = "tableList";
 
     synchronized static SharedPrefHelper helper(Context context) {
         if (instance == null) {

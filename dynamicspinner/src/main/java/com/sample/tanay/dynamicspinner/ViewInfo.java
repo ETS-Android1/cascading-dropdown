@@ -13,18 +13,14 @@ final class ViewInfo {
 
     Spinner spinner;
 
-    int level;
-
     DataNode previouslySelectedDataNode;
 
     DataNode itemToBeSelected;
 
-    ViewInfo(ArrayList<DataNode> dataset, ArrayAdapter<DataNode> adapter, Spinner spinner,
-             int level) {
+    ViewInfo(ArrayList<DataNode> dataset, ArrayAdapter<DataNode> adapter, Spinner spinner) {
         this.dataset = dataset;
         this.adapter = adapter;
         this.spinner = spinner;
-        this.level = level;
     }
 
 
