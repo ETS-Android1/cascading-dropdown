@@ -119,4 +119,56 @@ public class DataNodeUnitTest {
             index++;
         }
     }
+
+    @Test
+    public void getPosition() {
+        ArrayList<DataNode> dataNodes = new ArrayList<>();
+        for (int index = 0; index < CHILDREN.length; index++) {
+            dataNodes.add(new DataNode(CHILDREN[index]));
+        }
+        assertEquals(0, DataNode.getPosition(dataNodes.get(0), dataNodes));
+        assertEquals(1, DataNode.getPosition(dataNodes.get(1), dataNodes));
+        assertEquals(2, DataNode.getPosition(dataNodes.get(2), dataNodes));
+        assertEquals(3, DataNode.getPosition(dataNodes.get(3), dataNodes));
+    }
+
+    @Test
+    public void getLeafNodes() {
+        DataNode rootNode = new DataNode("name");
+        rootNode.children = new ArrayList<>();
+        ArrayList<DataNode> children = new ArrayList<>();
+        ArrayList<DataNode> leafNodes = new ArrayList<>();
+        for (int i1 = 0; i1 < CHILDREN.length; i1++) {
+            DataNode dataNode = new DataNode(CHILDREN[i1]);
+            dataNode.children = new ArrayList<>();
+            for (int i2 = 0; i2 < CHILDREN.length; i2++) {
+                DataNode child = new DataNode(CHILDREN[i2]);
+                dataNode.children.add(child);
+                children.add(child);
+            }
+            rootNode.children.add(dataNode);
+        }
+        DataNode.populateLeafNodes(leafNodes, rootNode, 2, 0);
+        int index = 0;
+        for (DataNode dataNode : leafNodes) {
+            assertEquals(dataNode, children.get(index));
+            index++;
+        }
+    }
+
+    @Test
+    public void suggestionText() {
+        DataNode rootNode = new DataNode("root");
+        rootNode.children = new ArrayList<>();
+        for (String childStr : CHILDREN) {
+            DataNode child = new DataNode(childStr);
+            child.children = new ArrayList<>();
+            rootNode.children.add(child);
+            child.parent = rootNode;
+            rootNode = child;
+        }
+        String text = CHILDREN[3] + ", " + CHILDREN[2] + ", " + CHILDREN[1] + ", " + CHILDREN[0];
+        assertEquals(rootNode.getSuggestionText(), text);
+    }
+
 }

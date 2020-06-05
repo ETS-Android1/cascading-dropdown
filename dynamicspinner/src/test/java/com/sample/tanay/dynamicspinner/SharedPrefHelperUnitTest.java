@@ -35,6 +35,8 @@ public class SharedPrefHelperUnitTest {
         mSharedPrefHelper = SharedPrefHelper.helper(context);
     }
 
+
+
     @Test
     public void databaseStatus() {
         when(mSharedPreference.getBoolean(SharedPrefHelper.DB_SAVED, false)).thenReturn(false);
