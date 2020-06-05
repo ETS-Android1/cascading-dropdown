@@ -19,15 +19,13 @@ final class ViewInfo {
 
     DataNode itemToBeSelected;
 
-    public ViewInfo(ArrayList<DataNode> dataset, ArrayAdapter<DataNode> adapter, Spinner spinner,
-                    int level) {
+    ViewInfo(ArrayList<DataNode> dataset, ArrayAdapter<DataNode> adapter, Spinner spinner,
+             int level) {
         this.dataset = dataset;
         this.adapter = adapter;
         this.spinner = spinner;
         this.level = level;
     }
 
-    public void setPreviouslySelectedDataNode(DataNode previouslySelectedDataNode) {
-        this.previouslySelectedDataNode = previouslySelectedDataNode;
-    }
+
 }

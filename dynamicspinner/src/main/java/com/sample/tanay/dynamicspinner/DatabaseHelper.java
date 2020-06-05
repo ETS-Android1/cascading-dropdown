@@ -83,19 +83,20 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
     private void loadTableData(SpinnerElement spinnerElement, DatabaseListener listener) {
         try {
-            String sql = "SELECT * FROM " + spinnerElement.type;
+            StringBuilder sqlBuilder = new StringBuilder("SELECT * FROM " + spinnerElement.type);
 
             if (spinnerElement.hasValues()) {
-                sql = sql + " WHERE";
+                sqlBuilder.append(" WHERE");
                 int index = 0;
                 for (String value : spinnerElement.values) {
-                    sql = " " + NAME + " LIKE " + '"' + value + '"' +
+                    String sql2 = " " + NAME + " LIKE " + '"' + value + '"' +
                             (index < spinnerElement.values.size() - 1 ? " OR " : "");
                     index++;
+                    sqlBuilder.append(sql2);
                 }
             }
 
-            Cursor cursor = db.rawQuery(sql, null);
+            Cursor cursor = db.rawQuery(sqlBuilder.toString(), null);
             DataNode rootNode = new DataNode("root");
             rootNode.children = new ArrayList<>();
 

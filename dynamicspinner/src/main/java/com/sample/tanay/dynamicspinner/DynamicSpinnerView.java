@@ -161,7 +161,8 @@ public class DynamicSpinnerView extends LinearLayout {
                                                             mSpinnerElements.size());
                                                     if (mSearchAdapter != null) {
                                                         DataNode.populateLeafNodes(mSearchAdapter.getDataset(),
-                                                                rootNode, mSpinnerElements.size(), pos + 1);
+                                                                rootNode, mSpinnerElements.size(),
+                                                                pos + 1);
                                                         mSearchAdapter.notifyDataSetChanged();
                                                     }
                                                     loadChildSpinners(rootNode.children, pos);

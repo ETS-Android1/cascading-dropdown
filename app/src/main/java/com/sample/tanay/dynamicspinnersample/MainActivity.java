@@ -59,13 +59,16 @@ public class MainActivity extends AppCompatActivity {
 
         register();
 
-        spinnerElements.add(new SpinnerElement("State",
+        Set<String> set4 = new HashSet<>();
+//        set4.add("State 21");
+//
+        spinnerElements.add(new SpinnerElement("State", set4,
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT)));
 
         Set<String> set = new HashSet<>();
-//        set.add("District 1");
-//        set.add("District 3");
+//        set.add("District 7");
+//        set.add("District 9");
 
 
         spinnerElements.add(new SpinnerElement("District", set,
