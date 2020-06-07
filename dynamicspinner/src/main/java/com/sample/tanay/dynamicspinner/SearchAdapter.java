@@ -18,6 +18,7 @@ import java.util.ArrayList;
 class SearchAdapter extends ArrayAdapter<DataNode> {
 
     private Filter mFilter = new Filter() {
+
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             if (constraint != null && constraint.length() > 0) {

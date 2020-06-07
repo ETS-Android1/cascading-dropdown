@@ -18,6 +18,10 @@ import java.util.ArrayList;
 
 public class DynamicSpinnerView extends LinearLayout {
 
+    public static final String SETUP_COMPLETE = "org.samagra.SETUP_COMPLETE";
+    public static final String SETUP_START = "org.samagra.SETUP_START";
+    public static final String SETUP_FAIL = "org.samagra.SETUP_FAIL";
+
     public static void setup(Context context, String filename, SetupListener setupListener) {
         DataProcessor.newInstance(context.getApplicationContext()).setup(filename, setupListener);
     }
@@ -84,6 +88,11 @@ public class DynamicSpinnerView extends LinearLayout {
                 Log.d("time", "step 8 info fetch complete");
                 setup(rootNode);
                 Log.d("time", "step 9 view setup complete");
+            }
+
+            @Override
+            public void onDatabaseNotExist() {
+                mDynamicSpinnerViewListener.onDatabaseNotExist();
             }
         }, lazyLoadingEnabled);
     }
@@ -171,6 +180,11 @@ public class DynamicSpinnerView extends LinearLayout {
                                                     }
                                                     Log.d("time", "step 11 lazy load complete");
                                                 }
+
+                                                @Override
+                                                public void onDatabaseNotExist() {
+
+                                                }
                                             }, selectedDataNode);
                         }
                     }
@@ -195,13 +209,19 @@ public class DynamicSpinnerView extends LinearLayout {
 
             final Spinner spinner = new Spinner(getContext());
             final ArrayList<DataNode> dataset = new ArrayList<>();
+            int position = 0;
             if (index == 0) {
                 dataset.addAll(rootNode.children);
+                if (element.valueToBeSelected != null) {
+                    position = DataNode.getPosition(element.valueToBeSelected, rootNode.children);
+                    element.valueToBeSelected = null;
+                }
             }
             ArrayAdapter<DataNode> adapter = new ArrayAdapter<>(getContext(), element.resourceId,
                     element.textViewId, dataset);
             spinner.setAdapter(adapter);
             addOnItemSelectedListener(spinner);
+            spinner.setSelection(position);
             spinner.setTag(index);
             spinner.setLayoutParams(element.layoutParams);
             View view = new View(getContext());
@@ -212,6 +232,9 @@ public class DynamicSpinnerView extends LinearLayout {
             addView(view);
             ViewInfo viewInfo = new ViewInfo(dataset, adapter, spinner);
             viewInfoArrayList.add(viewInfo);
+            if (index > 0 && element.valueToBeSelected != null) {
+                viewInfo.itemToBeSelected = new DataNode(element.valueToBeSelected);
+            }
             index++;
         }
 
@@ -242,11 +265,14 @@ public class DynamicSpinnerView extends LinearLayout {
         void onLoadStart();
 
         void onLoadComplete();
+
+        void onDatabaseNotExist();
+
     }
 
     public interface SetupListener {
-        void onSetupStart();
-
         void onSetupComplete();
+
+        void onSetupProcessStart();
     }
 }

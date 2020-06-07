@@ -23,10 +23,6 @@ class DataProcessor extends HandlerThread {
 
     private static final String TAG = "DataProcessor";
 
-    private static final String SETUP_COMPLETE = "org.samagra.SETUP_COMPLETE";
-    private static final String SETUP_START = "org.samagra.SETUP_START";
-    private static final String SETUP_FAIL = "org.samagra.SETUP_FAIL";
-
     private static DataProcessor instance;
 
     private Handler mHandler;
@@ -40,6 +36,8 @@ class DataProcessor extends HandlerThread {
     private SharedPrefHelper mSharedPrefHelper;
     private WeakReference<DynamicSpinnerView.SetupListener> mSetupListenerWeakReference;
     private LocalBroadcastManager mLocalBroadcastManager;
+    private boolean mSetupInProgress = false;
+
 
     synchronized static DataProcessor newInstance(Context context) {
         if (instance == null) {
@@ -73,21 +71,25 @@ class DataProcessor extends HandlerThread {
     }
 
     void setup(String filename, DynamicSpinnerView.SetupListener setupListener) {
-        mSetupListenerWeakReference = new WeakReference<>(setupListener);
+        if (!mSetupInProgress) {
+            mSetupListenerWeakReference = new WeakReference<>(setupListener);
 
-        Message message = new Message();
-        message.obj = filename;
-        message.what = 1;
+            Message message = new Message();
+            message.obj = filename;
+            message.what = 1;
 
-        mLocalBroadcastManager.sendBroadcast(new Intent(SETUP_START));
 
-        setupListener.onSetupStart();
-
-        if (mSharedPrefHelper.isDbSaved()) {
-            setupListener.onSetupComplete();
-            quitSafely();
-        } else {
-            getInternalHandler().sendMessage(message);
+            if (mSharedPrefHelper.isDbSaved()) {
+                mLocalBroadcastManager.sendBroadcast(new Intent(DynamicSpinnerView.SETUP_COMPLETE));
+                setupListener.onSetupComplete();
+                mSetupInProgress = false;
+                quitSafely();
+            } else {
+                mLocalBroadcastManager.sendBroadcast(new Intent(DynamicSpinnerView.SETUP_START));
+                mSetupInProgress = true;
+                setupListener.onSetupProcessStart();
+                getInternalHandler().sendMessage(message);
+            }
         }
     }
 
@@ -144,6 +146,8 @@ class DataProcessor extends HandlerThread {
 
                 Log.d("time", "step 6 info saved in shared pref saved");
 
+                mSetupInProgress = false;
+
                 if (mSetupListenerWeakReference.get() != null) {
                     getMainHandler().post(new Runnable() {
                         @Override
@@ -153,10 +157,11 @@ class DataProcessor extends HandlerThread {
                     });
                 }
 
-                mLocalBroadcastManager.sendBroadcast(new Intent(SETUP_COMPLETE));
+                mLocalBroadcastManager.sendBroadcast(new Intent(DynamicSpinnerView.SETUP_COMPLETE));
             } catch (final Exception ex) {
+                mSetupInProgress = false;
                 mLocalBroadcastManager
-                        .sendBroadcast(new Intent(SETUP_FAIL));
+                        .sendBroadcast(new Intent(DynamicSpinnerView.SETUP_FAIL));
             } finally {
                 quitSafely();
             }

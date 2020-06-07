@@ -27,6 +27,7 @@ class SpinnerThread extends HandlerThread {
     }
 
     private DatabaseHelper mDatabaseHelper;
+    private SharedPrefHelper mSharedPrefHelper;
     private SpinnerHandler mInternalHandler;
     private Handler mMainHandler;
     private AtomicInteger mAtomicInteger;
@@ -37,6 +38,7 @@ class SpinnerThread extends HandlerThread {
         super(TAG);
         this.mDatabaseHelper = DatabaseHelper.getInstance(context,
                 SharedPrefHelper.helper(context).getTableList());
+        this.mSharedPrefHelper = SharedPrefHelper.helper(context);
         this.mAtomicInteger = new AtomicInteger(0);
         mListenerArray = new SparseArray<>();
     }
@@ -65,12 +67,15 @@ class SpinnerThread extends HandlerThread {
 
     private void load(ArrayList<SpinnerElement> spinnerElements, Listener listener,
                       boolean lazyLoading, DataNode rootNode) {
-        int id = mAtomicInteger.incrementAndGet();
-        Message message = new Message();
-        message.obj = new Request(spinnerElements, id, lazyLoading, rootNode);
-        mListenerArray.put(id, listener);
-        getInternalHandler().sendMessage(message);
-
+        if (mSharedPrefHelper.isDbSaved()) {
+            int id = mAtomicInteger.incrementAndGet();
+            Message message = new Message();
+            message.obj = new Request(spinnerElements, id, lazyLoading, rootNode);
+            mListenerArray.put(id, listener);
+            getInternalHandler().sendMessage(message);
+        } else {
+            listener.onDatabaseNotExist();
+        }
     }
 
 
@@ -141,6 +146,8 @@ class SpinnerThread extends HandlerThread {
         void onLoadFailed(Exception exception);
 
         void onLoadSuccess(DataNode rootNode);
+
+        void onDatabaseNotExist();
     }
 
     private static class Request {

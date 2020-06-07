@@ -23,7 +23,7 @@ public class SpinnerElementUnitTest {
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         String type = "abc";
         Set<String> set = new HashSet<>();
-        SpinnerElement element = new SpinnerElement(type, set, params);
+        SpinnerElement element = new SpinnerElement(type, set, params, null);
         assertEquals(element.type, type);
         assertEquals(element.layoutParams, params);
         assertEquals(element.values, set);
@@ -34,7 +34,7 @@ public class SpinnerElementUnitTest {
         SpinnerElement element1 = new SpinnerElement("abc", null);
         assertFalse(element1.hasValues());
         HashSet<String> sets = new HashSet<>();
-        SpinnerElement element2 = new SpinnerElement("abc", sets, null);
+        SpinnerElement element2 = new SpinnerElement("abc", sets, null, null);
         assertFalse(element2.hasValues());
         sets.add("abc");
         assertTrue(element2.hasValues());
@@ -45,13 +45,13 @@ public class SpinnerElementUnitTest {
     public void spinnerElementListHasValues() {
         SpinnerElement element1 = new SpinnerElement("abc", null);
         HashSet<String> sets = new HashSet<>();
-        SpinnerElement element2 = new SpinnerElement("abc", sets, null);
+        SpinnerElement element2 = new SpinnerElement("abc", sets, null, null);
         ArrayList<SpinnerElement> elements = new ArrayList<>();
         elements.add(element1);
         elements.add(element2);
         assertFalse(SpinnerElement.hasValues(elements));
         HashSet<String> sets2 = new HashSet<>();
-        SpinnerElement element3 = new SpinnerElement("abc", sets2, null);
+        SpinnerElement element3 = new SpinnerElement("abc", sets2, null, null);
         sets2.add("A");
         elements.add(element3);
         assertTrue(SpinnerElement.hasValues(elements));

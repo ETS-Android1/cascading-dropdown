@@ -46,14 +46,22 @@ public final class SpinnerElement {
 
     int separatorWidthDp = 0, separatorHeightDp = 8;
 
+    String valueToBeSelected;
+
     public SpinnerElement(String type, ViewGroup.LayoutParams layoutParams) {
-        this(type, null, layoutParams);
+        this(type, null, layoutParams, null);
     }
 
-    public SpinnerElement(String type, Set<String> values, ViewGroup.LayoutParams layoutParams) {
+    public SpinnerElement(String type, ViewGroup.LayoutParams layoutParams, String valueToBeSelected) {
+        this(type, null, layoutParams, valueToBeSelected);
+    }
+
+    public SpinnerElement(String type, Set<String> values, ViewGroup.LayoutParams layoutParams,
+                          String valueToBeSelected) {
         this.type = type;
         this.values = values;
         this.layoutParams = layoutParams;
+        this.valueToBeSelected = valueToBeSelected;
     }
 
 

@@ -23,9 +23,13 @@ final class DataNode {
     }
 
     static int getPosition(DataNode dataNode, ArrayList<DataNode> dataNodes) {
+        return getPosition(dataNode.name, dataNodes);
+    }
+
+    static int getPosition(String name, ArrayList<DataNode> dataNodes) {
         int pos = -1, index = 0;
         for (DataNode dataNode1 : dataNodes) {
-            if (dataNode1.name.equals(dataNode.name)) {
+            if (dataNode1.name.equals(name)) {
                 pos = index;
                 break;
             }
@@ -33,6 +37,7 @@ final class DataNode {
         }
         return pos;
     }
+
 
     public String name;
 
