@@ -9,6 +9,7 @@ import android.util.SparseArray;
 
 import androidx.annotation.NonNull;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -33,7 +34,6 @@ class SpinnerThread extends HandlerThread {
     private AtomicInteger mAtomicInteger;
     private SparseArray<Listener> mListenerArray;
 
-
     private SpinnerThread(Context context) {
         super(TAG);
         this.mDatabaseHelper = DatabaseHelper.getInstance(context,
@@ -56,6 +56,7 @@ class SpinnerThread extends HandlerThread {
         }
         return mMainHandler;
     }
+
 
     void load(ArrayList<SpinnerElement> spinnerElements, Listener listener, boolean lazyLoading) {
         load(spinnerElements, listener, lazyLoading, null);

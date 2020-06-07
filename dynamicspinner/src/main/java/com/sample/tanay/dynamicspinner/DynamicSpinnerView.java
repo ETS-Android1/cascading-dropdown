@@ -70,31 +70,37 @@ public class DynamicSpinnerView extends LinearLayout {
 
 
     public void load(ArrayList<SpinnerElement> spinnerElements) {
-        this.mSpinnerElements = spinnerElements;
-        Log.d("time", "step 7 info fetch start");
-        SpinnerThread.getInstance(getContext()).load(spinnerElements, new SpinnerThread.Listener() {
-            @Override
-            public void onLoadStart() {
+        if (SharedPrefHelper.helper(getContext()).isDbSaved()) {
+            this.mSpinnerElements = spinnerElements;
+            Log.d("time", "step 7 info fetch start");
+            SpinnerThread.getInstance(getContext()).load(spinnerElements, new SpinnerThread.Listener() {
+                @Override
+                public void onLoadStart() {
+                    if (mDynamicSpinnerViewListener != null)
+                        mDynamicSpinnerViewListener.onLoadStart();
+                }
 
-            }
+                @Override
+                public void onLoadFailed(Exception exception) {
 
-            @Override
-            public void onLoadFailed(Exception exception) {
+                }
 
-            }
+                @Override
+                public void onLoadSuccess(DataNode rootNode) {
+                    Log.d("time", "step 8 info fetch complete");
+                    setup(rootNode);
+                    Log.d("time", "step 9 view setup complete");
+                }
 
-            @Override
-            public void onLoadSuccess(DataNode rootNode) {
-                Log.d("time", "step 8 info fetch complete");
-                setup(rootNode);
-                Log.d("time", "step 9 view setup complete");
-            }
-
-            @Override
-            public void onDatabaseNotExist() {
+                @Override
+                public void onDatabaseNotExist() {
+                    mDynamicSpinnerViewListener.onDatabaseNotExist();
+                }
+            }, lazyLoadingEnabled);
+        } else {
+            if (mDynamicSpinnerViewListener != null)
                 mDynamicSpinnerViewListener.onDatabaseNotExist();
-            }
-        }, lazyLoadingEnabled);
+        }
     }
 
     private void setupAutocomplete(DataNode rootNode) {

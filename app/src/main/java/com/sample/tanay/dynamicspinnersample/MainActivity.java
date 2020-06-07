@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         dynamicSpinnerView = findViewById(R.id.dynamicSpinnerView);
         spinnerElements = new ArrayList<>();
 
+//        dynamicSpinnerView.setLazyLoadingEnabled(true);
 
         Set<String> set4 = new HashSet<>();
 //        set4.add("State 21");
@@ -75,11 +76,11 @@ public class MainActivity extends AppCompatActivity {
 
         spinnerElements.add(new SpinnerElement("Zilla",
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT), "Zilla 2"));
+                        ViewGroup.LayoutParams.WRAP_CONTENT), "Zilla 9"));
 
         spinnerElements.add(new SpinnerElement("Tehsil",
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT), "Tehsil 2"));
+                        ViewGroup.LayoutParams.WRAP_CONTENT), "Tehsil 44"));
 
         spinnerElements.add(new SpinnerElement("Block",
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -87,8 +88,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         Set<String> set2 = new HashSet<>();
-        set2.add("Village 1");
-        set2.add("Village 2");
+//        set2.add("Village 1");
+//        set2.add("Village 2");
 
         spinnerElements.add(new SpinnerElement("Village", set2,
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -103,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
                         ViewGroup.LayoutParams.WRAP_CONTENT), null));
 
 
-        dynamicSpinnerView.setLazyLoadingEnabled(true);
         dynamicSpinnerView.setDynamicSpinnerViewListener(new DynamicSpinnerView.DynamicSpinnerViewListener() {
             @Override
             public void onLoadStart() {
@@ -123,31 +123,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDatabaseNotExist() {
                 mNeedToRegister = true;
+                onLoadStart();
                 register();
             }
         });
 
-        DynamicSpinnerView.setup(this, "sample.json",
-                new DynamicSpinnerView.SetupListener() {
-
-                    @Override
-                    public void onSetupComplete() {
-                        if (mProgressDialog != null) {
-                            mProgressDialog.hide();
-                        }
-                        dynamicSpinnerView.load(spinnerElements);
-                    }
-
-                    @Override
-                    public void onSetupProcessStart() {
-                        if (mProgressDialog == null) {
-                            mProgressDialog = ProgressDialog.show(MainActivity.this, "Loading", null);
-                        }
-                        mNeedToRegister = true;
-                        register();
-                        mProgressDialog.show();
-                    }
-                });
+        dynamicSpinnerView.load(spinnerElements);
     }
 
     @Override
