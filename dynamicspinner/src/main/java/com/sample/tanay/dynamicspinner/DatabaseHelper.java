@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 class DatabaseHelper extends SQLiteOpenHelper {
 
-    private static final String DB_NAME = "DynamicSpinnerDb";
+    static final String DB_NAME = "DynamicSpinnerDb";
     private static final int MAX_LIMIT = 150000;
     private ArrayList<String> tableNames;
     private SQLiteDatabase db;

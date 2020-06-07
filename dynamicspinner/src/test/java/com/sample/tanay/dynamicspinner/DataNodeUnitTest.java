@@ -1,10 +1,12 @@
 package com.sample.tanay.dynamicspinner;
 
+import android.os.Bundle;
 import android.util.SparseIntArray;
 
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import static org.junit.Assert.*;

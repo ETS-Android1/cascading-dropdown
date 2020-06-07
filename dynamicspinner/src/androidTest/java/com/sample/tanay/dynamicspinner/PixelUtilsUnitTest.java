@@ -1,18 +1,14 @@
 package com.sample.tanay.dynamicspinner;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.util.DisplayMetrics;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(AndroidJUnit4.class)
 

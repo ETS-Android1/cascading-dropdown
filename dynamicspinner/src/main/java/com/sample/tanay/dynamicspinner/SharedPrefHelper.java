@@ -41,7 +41,7 @@ class SharedPrefHelper {
     }
 
     ArrayList<String> getTableList() {
-        String json = sharedPreferences.getString(TABLE_LIST, "{\"names\":\"[]\"}");
+        String json = sharedPreferences.getString(TABLE_LIST, "{\"names\":[]}");
         return new Gson().fromJson(json, TableList.class).names;
     }
 
