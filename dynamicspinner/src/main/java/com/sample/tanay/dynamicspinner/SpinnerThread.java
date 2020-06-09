@@ -36,9 +36,8 @@ class SpinnerThread extends HandlerThread {
 
     private SpinnerThread(Context context) {
         super(TAG);
-        this.mDatabaseHelper = DatabaseHelper.getInstance(context,
-                SharedPrefHelper.helper(context).getTableList());
         this.mSharedPrefHelper = SharedPrefHelper.helper(context);
+        this.mDatabaseHelper = DatabaseHelper.getInstance(context);
         this.mAtomicInteger = new AtomicInteger(0);
         mListenerArray = new SparseArray<>();
     }

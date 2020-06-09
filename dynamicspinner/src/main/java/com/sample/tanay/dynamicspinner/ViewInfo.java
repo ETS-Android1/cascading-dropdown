@@ -23,5 +23,13 @@ final class ViewInfo {
         this.spinner = spinner;
     }
 
+    String getSelectedInfo() {
+        String result = "";
+        if (spinner != null) {
+            DataNode node = (DataNode) spinner.getSelectedItem();
+            result = node.name;
+        }
+        return result;
+    }
 
 }

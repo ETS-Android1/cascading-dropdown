@@ -14,7 +14,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
     static final String DB_NAME = "DynamicSpinnerDb";
     private static final int MAX_LIMIT = 150000;
-    private ArrayList<String> tableNames;
+    private ArrayList<String> tableNames, oldTableNames;
     private SQLiteDatabase db;
 
     private static final String ID = "Id";
@@ -30,14 +30,43 @@ class DatabaseHelper extends SQLiteOpenHelper {
         return instance;
     }
 
+    static synchronized DatabaseHelper getInstance(Context context) {
+        if (instance == null) {
+            instance = getInstance(context.getApplicationContext(), SharedPrefHelper.helper(context).getTableList(),
+                    new ArrayList<String>(), SharedPrefHelper.helper(context).getDatabaseVersion());
+        }
+        return instance;
+    }
+
+    static synchronized DatabaseHelper getInstance(Context context, ArrayList<String> tableNames,
+                                                   ArrayList<String> oldTableNames, int version) {
+        if (instance == null) {
+            instance = new DatabaseHelper(context, tableNames, version, oldTableNames);
+        }
+        return instance;
+    }
+
     private DatabaseHelper(@Nullable Context context, ArrayList<String> tableNames) {
+
         super(context, DB_NAME, null, 1);
         this.tableNames = tableNames;
         db = getWritableDatabase();
     }
 
+    private DatabaseHelper(Context context, ArrayList<String> tableNames, int version, ArrayList<String>
+            oldTableNames) {
+        super(context, DB_NAME, null, version);
+        this.tableNames = tableNames;
+        this.oldTableNames = oldTableNames;
+        db = getWritableDatabase();
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
+        createTables(tableNames, db);
+    }
+
+    private void createTables(ArrayList<String> tableNames, SQLiteDatabase db) {
         int index = 0;
         for (String tableName : tableNames) {
             String sql = getTableSQL(tableName, index == 0 ? null : tableNames.get(index - 1));
@@ -271,7 +300,19 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        db.beginTransaction();
+        try {
+            for (String oldTableName : oldTableNames) {
+                String sql = "DROP Table \"" + oldTableName + "\";";
+                db.execSQL(sql);
+            }
+            db.setTransactionSuccessful();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            db.endTransaction();
+        }
+        createTables(tableNames, db);
     }
 
     interface DatabaseListener {

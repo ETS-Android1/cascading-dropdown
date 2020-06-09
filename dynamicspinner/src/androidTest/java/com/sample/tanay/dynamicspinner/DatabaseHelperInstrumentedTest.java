@@ -35,7 +35,7 @@ public class DatabaseHelperInstrumentedTest {
         for (int i = 0; i < 7; i++) {
             tableNames.add("TABLE " + i);
         }
-//        mDatabaseHelper = DatabaseHelper.getInstance(mContext, tableNames);
+        mDatabaseHelper = DatabaseHelper.getInstance(mContext, tableNames);
     }
 
     @Test
@@ -46,7 +46,7 @@ public class DatabaseHelperInstrumentedTest {
     @Test
     public void tableCreation() {
         SQLiteDatabase database = mDatabaseHelper.getWritableDatabase();
-        String sql = "select name from sqlite_master where name = 'table' "
+        String sql = "select \"name\" from \"sqlite_master\" where name like \"table\" "
 //                + " name NOT LIKE 'sqlite_%' and name not like 'android_metadata%'"
                 ;
         Cursor cursor = database.rawQuery(sql, null);

@@ -14,6 +14,8 @@ import android.widget.Spinner;
 
 import androidx.annotation.Nullable;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 public class DynamicSpinnerView extends LinearLayout {
@@ -22,8 +24,8 @@ public class DynamicSpinnerView extends LinearLayout {
     public static final String SETUP_START = "org.samagra.SETUP_START";
     public static final String SETUP_FAIL = "org.samagra.SETUP_FAIL";
 
-    public static void setup(Context context, String filename, SetupListener setupListener) {
-        DataProcessor.newInstance(context.getApplicationContext()).setup(filename, setupListener);
+    public static void setup(Context context, String filename, SetupListener setupListener, int version) {
+        DataProcessor.newInstance(context.getApplicationContext()).setup(filename, setupListener, version);
     }
 
     private DynamicSpinnerViewListener mDynamicSpinnerViewListener;
@@ -57,7 +59,7 @@ public class DynamicSpinnerView extends LinearLayout {
 
     private void init() {
         setOrientation(VERTICAL);
-        lazyLoadingEnabled = false;
+        lazyLoadingEnabled = true;
     }
 
     public void setLazyLoadingEnabled(boolean lazyLoadingEnabled) {
@@ -265,6 +267,21 @@ public class DynamicSpinnerView extends LinearLayout {
         } else {
             nextViewInfo.spinner.setSelection(0);
         }
+    }
+
+    public String getInfo() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            if (mSpinnerElements != null && viewInfoArrayList != null
+                    && viewInfoArrayList.size() == mSpinnerElements.size()) {
+                for (int index = 0; index < viewInfoArrayList.size(); index++) {
+                    jsonObject.put(mSpinnerElements.get(index).type, viewInfoArrayList.get(index).getSelectedInfo());
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return jsonObject.toString();
     }
 
     public interface DynamicSpinnerViewListener {

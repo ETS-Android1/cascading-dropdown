@@ -37,7 +37,7 @@ public class SharedPrefHelperInstrumentedTest {
     @Test
     public void databaseStatus() {
         assertFalse(mSharedPrefHelper.isDbSaved());
-        mSharedPrefHelper.setDbSaved();
+        mSharedPrefHelper.setDbSaved(true);
         assertTrue(mSharedPrefHelper.isDbSaved());
     }
 
@@ -54,6 +54,14 @@ public class SharedPrefHelperInstrumentedTest {
         for (int i = 0; i < names.size(); i++) {
             assertEquals(names.get(i), retreivedList.get(i));
         }
+    }
 
+    @Test
+    public void dbVersion() {
+        int dbVersion1 = 5, dbVersion2 = 6;
+        mSharedPrefHelper.setDatabaseVersion(dbVersion1);
+        assertEquals(dbVersion1, mSharedPrefHelper.getDatabaseVersion());
+        mSharedPrefHelper.setDatabaseVersion(dbVersion2);
+        assertEquals(dbVersion2, mSharedPrefHelper.getDatabaseVersion());
     }
 }

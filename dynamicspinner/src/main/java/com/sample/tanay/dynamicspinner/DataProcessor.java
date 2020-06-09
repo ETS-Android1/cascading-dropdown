@@ -37,6 +37,7 @@ class DataProcessor extends HandlerThread {
     private WeakReference<DynamicSpinnerView.SetupListener> mSetupListenerWeakReference;
     private LocalBroadcastManager mLocalBroadcastManager;
     private boolean mSetupInProgress = false;
+    private int dataVersionToBeCreated = -1;
 
 
     synchronized static DataProcessor newInstance(Context context) {
@@ -70,21 +71,23 @@ class DataProcessor extends HandlerThread {
         return mInternalHandler;
     }
 
-    void setup(String filename, DynamicSpinnerView.SetupListener setupListener) {
+    void setup(String filename, DynamicSpinnerView.SetupListener setupListener, int version) {
         if (!mSetupInProgress) {
+            dataVersionToBeCreated = version;
             mSetupListenerWeakReference = new WeakReference<>(setupListener);
 
             Message message = new Message();
-            message.obj = filename;
-            message.what = 1;
+            message.obj = new Request(filename, version);
 
+            Log.d("time", "step 11 is db saved " + mSharedPrefHelper.isDbSaved());
 
-            if (mSharedPrefHelper.isDbSaved()) {
+            if (mSharedPrefHelper.isDbSaved() && !mSharedPrefHelper.isNewVersion(version)) {
                 mLocalBroadcastManager.sendBroadcast(new Intent(DynamicSpinnerView.SETUP_COMPLETE));
                 setupListener.onSetupComplete();
                 mSetupInProgress = false;
                 quitSafely();
             } else {
+                mSharedPrefHelper.setDbSaved(false);
                 mLocalBroadcastManager.sendBroadcast(new Intent(DynamicSpinnerView.SETUP_START));
                 mSetupInProgress = true;
                 setupListener.onSetupProcessStart();
@@ -97,7 +100,8 @@ class DataProcessor extends HandlerThread {
         if (mDatabaseHelper == null) {
             Context appContext = mApplicationContext.get();
             if (appContext != null) {
-                mDatabaseHelper = DatabaseHelper.getInstance(appContext, names);
+                mDatabaseHelper = DatabaseHelper.getInstance(appContext, names,
+                        mSharedPrefHelper.getTableList(), dataVersionToBeCreated);
             } else {
                 quit();
             }
@@ -105,8 +109,9 @@ class DataProcessor extends HandlerThread {
         return mDatabaseHelper;
     }
 
-    private void process(String fileName) {
+    private void process(String fileName, int version) {
         if (mApplicationContext.get() != null) {
+            dataVersionToBeCreated = version;
             Context activity = mApplicationContext.get();
             try {
 
@@ -142,7 +147,8 @@ class DataProcessor extends HandlerThread {
                 Log.d("time", "index built " + System.currentTimeMillis());
 
                 mSharedPrefHelper.saveTableList(new TableList(names));
-                mSharedPrefHelper.setDbSaved();
+                mSharedPrefHelper.setDbSaved(true);
+                mSharedPrefHelper.setDatabaseVersion(version);
 
                 Log.d("time", "step 6 info saved in shared pref saved");
 
@@ -238,6 +244,17 @@ class DataProcessor extends HandlerThread {
     }
 
 
+    static class Request {
+
+        private String fileName;
+        private int versionCode;
+
+        Request(String fileName, int versionCode) {
+            this.fileName = fileName;
+            this.versionCode = versionCode;
+        }
+    }
+
     private class ProcessorHandler extends Handler {
 
         ProcessorHandler(Looper looper) {
@@ -247,7 +264,8 @@ class DataProcessor extends HandlerThread {
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
-            process((String) msg.obj);
+            Request request = (Request) msg.obj;
+            process(request.fileName, request.versionCode);
         }
     }
 }

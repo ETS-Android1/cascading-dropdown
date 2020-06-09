@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.sample.tanay.dynamicspinner.DynamicSpinnerView;
@@ -55,14 +57,14 @@ public class MainActivity extends AppCompatActivity {
         dynamicSpinnerView = findViewById(R.id.dynamicSpinnerView);
         spinnerElements = new ArrayList<>();
 
-//        dynamicSpinnerView.setLazyLoadingEnabled(true);
+        dynamicSpinnerView.setLazyLoadingEnabled(true);
 
         Set<String> set4 = new HashSet<>();
 //        set4.add("State 21");
 //
         spinnerElements.add(new SpinnerElement("State", set4,
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT), "STATE 7"));
+                        ViewGroup.LayoutParams.WRAP_CONTENT), "STATE 12"));
 
         Set<String> set = new HashSet<>();
 //        set.add("District 7");
@@ -76,11 +78,11 @@ public class MainActivity extends AppCompatActivity {
 
         spinnerElements.add(new SpinnerElement("Zilla",
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT), "Zilla 9"));
+                        ViewGroup.LayoutParams.WRAP_CONTENT), "Zilla 2"));
 
         spinnerElements.add(new SpinnerElement("Tehsil",
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT), "Tehsil 44"));
+                        ViewGroup.LayoutParams.WRAP_CONTENT), "Tehsil 3"));
 
         spinnerElements.add(new SpinnerElement("Block",
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -98,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
         Set<String> set3 = new HashSet<>();
 //        set3.add("School 1");
 //        set3.add("School 2");
-
+//
         spinnerElements.add(new SpinnerElement("School", set3,
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT), null));
@@ -125,6 +127,13 @@ public class MainActivity extends AppCompatActivity {
                 mNeedToRegister = true;
                 onLoadStart();
                 register();
+            }
+        });
+
+        findViewById(R.id.btnClick).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("time","data is " + dynamicSpinnerView.getInfo());
             }
         });
 
