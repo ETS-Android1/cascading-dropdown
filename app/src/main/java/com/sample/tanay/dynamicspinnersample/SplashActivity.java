@@ -16,17 +16,21 @@ public class SplashActivity extends AppCompatActivity {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        DynamicSpinnerView.setup(this, "sample.json", new DynamicSpinnerView.SetupListener() {
-            @Override
-            public void onSetupComplete() {
+        DynamicSpinnerView.setup(this /* application context required to read from assets*/,
+                "sample.json" /* full name of the JSON file in the assets folder*/,
+                new DynamicSpinnerView.SetupListener() {
+                    @Override
+                    public void onSetupComplete() {
 
-            }
+                    }
 
-            @Override
-            public void onSetupProcessStart() {
+                    @Override
+                    public void onSetupProcessStart() {
 
-            }
-        }, 2);
+                    }
+                } /* an instance of the listener which will be called during the setup process*/,
+                2 /*the version code in integer, if you want to use a different file as data
+                 data source from the old file then the version code needs to be incremented*/);
 
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
