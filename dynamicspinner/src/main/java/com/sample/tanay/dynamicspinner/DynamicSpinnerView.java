@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 
 import org.json.JSONObject;
 
@@ -24,6 +25,18 @@ public class DynamicSpinnerView extends LinearLayout {
     public static final String SETUP_START = "org.samagra.SETUP_START";
     public static final String SETUP_FAIL = "org.samagra.SETUP_FAIL";
 
+    /**
+     * Starts a {@link DataProcessor} thread to
+     * read from a JSON file in the assets folder and save the information in
+     * an SQLite Database.
+     * See {@link DataProcessor#setup(String, SetupListener, int)}
+     * for internal working
+     *
+     * @param context       application context
+     * @param filename      the JSON file in the assets folder
+     * @param setupListener {@link SetupListener}
+     * @param version       the database version name
+     */
     public static void setup(Context context, String filename, SetupListener setupListener, int version) {
         DataProcessor.newInstance(context.getApplicationContext()).setup(filename, setupListener, version);
     }
@@ -35,6 +48,8 @@ public class DynamicSpinnerView extends LinearLayout {
     private boolean lazyLoadingEnabled;
     private SearchAdapter mSearchAdapter;
 
+    private @StringRes
+    int mSearchPlaceHolderStringId = -1;
 
     public DynamicSpinnerView(Context context) {
         super(context);
@@ -55,6 +70,10 @@ public class DynamicSpinnerView extends LinearLayout {
     public DynamicSpinnerView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
+    }
+
+    public void setSearchPlaceHolder(int mSearchPlaceHolderStringId) {
+        this.mSearchPlaceHolderStringId = mSearchPlaceHolderStringId;
     }
 
     private void init() {
@@ -112,6 +131,11 @@ public class DynamicSpinnerView extends LinearLayout {
                 android.R.id.text1, leafNodes);
 
         final AutoCompleteTextView autoCompleteTextView = new AutoCompleteTextView(getContext());
+
+        if (mSearchPlaceHolderStringId != -1) {
+            autoCompleteTextView.setHint(mSearchPlaceHolderStringId);
+        }
+
         autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

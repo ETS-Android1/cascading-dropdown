@@ -2,4 +2,5 @@
     <string name="app_name">Dynamic Spinner Sample</string>
     <string name="pleaseSelectADistrict">Please select a district</string>
     <string name="pleaseSelectABlock">Please select a block</string>
+    <string name="searchBySchool">Search School</string>
 </resources>

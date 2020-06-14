@@ -59,52 +59,35 @@ public class MainActivity extends AppCompatActivity {
 
         dynamicSpinnerView.setLazyLoadingEnabled(true);
 
-        Set<String> set4 = new HashSet<>();
-//        set4.add("State 21");
-//
-        spinnerElements.add(new SpinnerElement("State", set4,
-                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT), "STATE 12"));
 
         Set<String> set = new HashSet<>();
-//        set.add("District 7");
-//        set.add("District 9");
 
-
-        spinnerElements.add(new SpinnerElement("District", set,
+        spinnerElements.add(new SpinnerElement("State",
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT), "District 3"));
+                        ViewGroup.LayoutParams.WRAP_CONTENT)));
 
 
-        spinnerElements.add(new SpinnerElement("Zilla",
+        spinnerElements.add(new SpinnerElement("District",
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT), "Zilla 2"));
+                        ViewGroup.LayoutParams.WRAP_CONTENT)));
 
-        spinnerElements.add(new SpinnerElement("Tehsil",
-                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT), "Tehsil 3"));
 
         spinnerElements.add(new SpinnerElement("Block",
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT)));
 
 
-        Set<String> set2 = new HashSet<>();
-//        set2.add("Village 1");
-//        set2.add("Village 2");
-
-        spinnerElements.add(new SpinnerElement("Village", set2,
+        spinnerElements.add(new SpinnerElement("Village",
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT), null));
+                        ViewGroup.LayoutParams.WRAP_CONTENT)));
 
-        Set<String> set3 = new HashSet<>();
-//        set3.add("School 1");
-//        set3.add("School 2");
-//
-        spinnerElements.add(new SpinnerElement("School", set3,
+
+        spinnerElements.add(new SpinnerElement("School",
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT), null));
+                        ViewGroup.LayoutParams.WRAP_CONTENT)));
 
+
+        dynamicSpinnerView.setSearchPlaceHolder(R.string.searchBySchool);
 
         dynamicSpinnerView.setDynamicSpinnerViewListener(new DynamicSpinnerView.DynamicSpinnerViewListener() {
             @Override
@@ -133,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btnClick).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("time","data is " + dynamicSpinnerView.getInfo());
+                Log.d("time", "data is " + dynamicSpinnerView.getInfo());
             }
         });
 

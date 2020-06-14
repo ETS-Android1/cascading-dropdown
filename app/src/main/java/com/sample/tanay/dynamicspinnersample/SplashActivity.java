@@ -26,10 +26,9 @@ public class SplashActivity extends AppCompatActivity {
             public void onSetupProcessStart() {
 
             }
-        }, 10);
+        }, 2);
 
         Handler handler = new Handler();
-
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -38,5 +37,6 @@ public class SplashActivity extends AppCompatActivity {
                 finish();
             }
         }, 1000);
+
     }
 }
