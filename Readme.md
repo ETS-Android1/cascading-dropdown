@@ -184,6 +184,19 @@ JSON file [sample.json](app/src/main/assets/sample.json).
       dynamicSpinnerView.setLazyLoadingEnabled(false);
   ```
 
+* Code to get the data from the spinner.
+
+  ```
+  dynamicSpinnerView.getInfo()
+  ```
+  This returns a JSON object with the information selected.
+  
+  Sample response.
+  
+  ```
+  {"State":"STATE 3","District":"District 1","Block":"Block 1","Village":"Village 1","School":"School 1"}
+  ```
+  
 **Note:** see the sample app codebase for details
 
 ### Internal-Working
