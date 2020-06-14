@@ -1,13 +1,14 @@
 *   [Overview](#Overview)
 *   [Import](#Import)
-*   [How it works](#Howitworks)
+*   [Internal Working](#Internal-Working)
 *   [Usage](#Usage)
 ### Overview
 
 An Android UI library which allows developers to create a cascading
 dropdown. The multiple spinners are populated with data from a JSON file
 provided in the **module-name/src/main/assets** folder. Check the
-[sample APK](app-debug.apk) to see library in usage.
+[sample APK](app-debug.apk) to see library in usage corresponding to the
+JSON file [sample.json](app/src/main/assets/sample.json).
 
 <p align="center">
 <kbd>
@@ -38,12 +39,27 @@ provided in the **module-name/src/main/assets** folder. Check the
   in your module.
 
 
-### How it works
 
 
   
 ### Usage
 
-*
+* Call the method `DynamicSpinnerView.setup(this /* application context
+  required to read from assets*/, "sample.json" /* full name of the JSON
+  file in the assets folder*/, new DynamicSpinnerView.SetupListener() {
+  @Override public void onSetupComplete() {
+
+                    }
+
+                    @Override
+                    public void onSetupProcessStart() {
+
+                    }
+                } /* an instance of the listener which will be called during the setup process*/,
+                2 /*the version code in integer, if you want to use a different file as data
+                 data source from the old file then the version code needs to be incremented*/);
+`
 
 **Note** see the sample app codebase for details
+
+### Internal-Working

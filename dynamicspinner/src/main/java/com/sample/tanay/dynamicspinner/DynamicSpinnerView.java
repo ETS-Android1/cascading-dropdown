@@ -35,7 +35,8 @@ public class DynamicSpinnerView extends LinearLayout {
      * @param context       application context
      * @param filename      the JSON file in the assets folder
      * @param setupListener {@link SetupListener}
-     * @param version       the database version name
+     * @param version       the database version number. If you want to use a different file as data
+     *                      data source from the old file then the version code needs to be incremented
      */
     public static void setup(Context context, String filename, SetupListener setupListener, int version) {
         DataProcessor.newInstance(context.getApplicationContext()).setup(filename, setupListener, version);
@@ -293,6 +294,13 @@ public class DynamicSpinnerView extends LinearLayout {
         }
     }
 
+    /*
+            Returns the information associated with the DynamicSpinnerView in a JSON
+            format.
+            Example of the data returned:
+            {"State":"STATE 1","District":"District 1","Block":"Block 3","Village":"Village 1","School":"School 4"}
+     */
+
     public String getInfo() {
         JSONObject jsonObject = new JSONObject();
         try {
@@ -308,17 +316,56 @@ public class DynamicSpinnerView extends LinearLayout {
         return jsonObject.toString();
     }
 
+
+    /**
+     * Listener to relay information about the data loading process.
+     */
+
     public interface DynamicSpinnerViewListener {
+
+        /**
+         * Called when the process to load
+         * the data into the dynamic spinner view
+         * has been started
+         */
+
         void onLoadStart();
 
+        /**
+         * Called when the process to load the data
+         * into the dynamic spinner view has been completed.
+         */
+
         void onLoadComplete();
+
+        /**
+         * Called if a data load has been requested but the process to
+         * save the information from the file in the assets folder into
+         * an SQLite Database has not been completed yet.
+         */
 
         void onDatabaseNotExist();
 
     }
 
+    /**
+     * Listener which is used to relay updates about the data saving process.
+     */
+
     public interface SetupListener {
+        /**
+         * Called when the setup has been completed. If the data has already been saved and the
+         * {@link DynamicSpinnerView#setup(Context, String, SetupListener, int)} method is called
+         * then this method is called right away and {@link SetupListener#onSetupProcessStart()}
+         * is not called.
+         */
         void onSetupComplete();
+
+        /**
+         * Called when the process to save the information from the file corresponding to the
+         * file name in the method {@link DynamicSpinnerView#setup(Context, String, SetupListener, int)}
+         * has been started.
+         */
 
         void onSetupProcessStart();
     }
