@@ -30,8 +30,23 @@ public final class SpinnerElement {
         return list;
     }
 
+    /**
+     * Represents the type of entity. Must correspond
+     * to a key in the source JSON file.
+     */
     String type;
+
+    /**
+     * If this is not empty then only those values will be fetched
+     * whose name is exists in the set.
+     */
+
     Set<String> values;
+
+    /**
+     * The {@link android.view.ViewGroup.LayoutParams} instance used to set the
+     * layout params of the spinner.
+     */
 
     ViewGroup.LayoutParams layoutParams;
 
@@ -43,6 +58,11 @@ public final class SpinnerElement {
 
     @LayoutRes
     int dropdownResId = -1;
+
+    /**
+     * The height and width of the separators between any two spinners.
+     * There is no separator above the first spinner.
+     */
 
     int separatorWidthDp = 0, separatorHeightDp = 8;
 
@@ -67,5 +87,14 @@ public final class SpinnerElement {
 
     boolean hasValues() {
         return values != null && values.size() > 0;
+    }
+
+    public void setResourceAndTextId(@LayoutRes int layoutId, @IdRes int textViewId) {
+        this.resourceId = layoutId;
+        this.textViewId = textViewId;
+    }
+
+    public void setDropdownResId(@LayoutRes int layoutId) {
+        this.dropdownResId = layoutId;
     }
 }

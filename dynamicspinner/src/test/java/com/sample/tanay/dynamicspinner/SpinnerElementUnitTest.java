@@ -70,4 +70,21 @@ public class SpinnerElementUnitTest {
         assertEquals(subset.size(), 1);
         assertEquals(subset.get(0), element3);
     }
+
+    @Test
+    public void resourceIdAndTextId() {
+        int resId = 11, textId = 12;
+        SpinnerElement element1 = new SpinnerElement("abc", null);
+        element1.setResourceAndTextId(resId, textId);
+        assertEquals(resId, element1.resourceId);
+        assertEquals(textId, element1.textViewId);
+    }
+
+    @Test
+    public void dropdownId() {
+        int id = 1;
+        SpinnerElement element1 = new SpinnerElement("abc", null);
+        element1.setDropdownResId(id);
+        assertEquals(element1.dropdownResId, id);
+    }
 }

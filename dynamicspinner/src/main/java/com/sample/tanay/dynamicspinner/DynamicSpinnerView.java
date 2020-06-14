@@ -86,6 +86,12 @@ public class DynamicSpinnerView extends LinearLayout {
         this.lazyLoadingEnabled = lazyLoadingEnabled;
     }
 
+    /**
+     * Set the {@link DynamicSpinnerViewListener} to relay the data loading events
+     *
+     * @param mDynamicSpinnerViewListener
+     */
+
     public void setDynamicSpinnerViewListener(DynamicSpinnerViewListener mDynamicSpinnerViewListener) {
         this.mDynamicSpinnerViewListener = mDynamicSpinnerViewListener;
     }
@@ -104,7 +110,9 @@ public class DynamicSpinnerView extends LinearLayout {
 
                 @Override
                 public void onLoadFailed(Exception exception) {
-
+                    if (mDynamicSpinnerViewListener != null) {
+                        mDynamicSpinnerViewListener.onLoadFailed(exception);
+                    }
                 }
 
                 @Override
@@ -194,7 +202,9 @@ public class DynamicSpinnerView extends LinearLayout {
 
                                                 @Override
                                                 public void onLoadFailed(Exception exception) {
-
+                                                    if (mDynamicSpinnerViewListener != null) {
+                                                        mDynamicSpinnerViewListener.onLoadFailed(exception);
+                                                    }
                                                 }
 
                                                 @Override
@@ -342,10 +352,23 @@ public class DynamicSpinnerView extends LinearLayout {
          * Called if a data load has been requested but the process to
          * save the information from the file in the assets folder into
          * an SQLite Database has not been completed yet.
+         * Inside this method body you can register a {@link android.content.BroadcastReceiver}
+         * using {@link androidx.localbroadcastmanager.content.LocalBroadcastManager} to listen
+         * for the broadcasts
+         * 1) {@link DynamicSpinnerView#SETUP_COMPLETE} called when setup process is complete
+         * 2) {@link DynamicSpinnerView#SETUP_FAIL} called when setup process has failed due to any reason
+         * 3) {@link DynamicSpinnerView#SETUP_START} sent when setup process is about to start.
          */
 
         void onDatabaseNotExist();
 
+
+        /**
+         * Called whenever the data load process fails for any reason.
+         *
+         * @param ex Exception instance describing the error
+         */
+        void onLoadFailed(Exception ex);
     }
 
     /**

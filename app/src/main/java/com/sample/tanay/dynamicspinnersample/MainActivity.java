@@ -60,8 +60,6 @@ public class MainActivity extends AppCompatActivity {
         dynamicSpinnerView.setLazyLoadingEnabled(true);
 
 
-        Set<String> set = new HashSet<>();
-
         spinnerElements.add(new SpinnerElement("State",
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT)));
@@ -110,6 +108,12 @@ public class MainActivity extends AppCompatActivity {
                 mNeedToRegister = true;
                 onLoadStart();
                 register();
+            }
+
+            @Override
+            public void onLoadFailed(Exception ex) {
+                onLoadComplete();
+                ex.printStackTrace();
             }
         });
 
