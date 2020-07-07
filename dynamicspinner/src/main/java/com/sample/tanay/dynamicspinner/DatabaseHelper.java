@@ -135,6 +135,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
                     String name = cursor.getString(cursor.getColumnIndex(NAME));
                     rootNode.children.add(new DataNode(name, id));
                 } while (cursor.moveToNext());
+                cursor.close();
             }
 
             listener.onLoadComplete(rootNode);
